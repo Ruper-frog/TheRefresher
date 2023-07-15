@@ -138,10 +138,12 @@ def time_checker():
 
         point = (round(CenterCircle[0] + Radius * math.cos(angle_radians)),
                  round(CenterCircle[1] - Radius * math.sin(angle_radians)))
-
+        move_mouse(point)
         if get_pixel_rgb(point) == FullCircleColor:
             print(angle)
-            return angle * Timer / 360
+            chase_me(angle)
+            return 0
+            # return angle * Timer / 360
         angle += 1
 
     # cut_degree_counter = 0
@@ -162,7 +164,18 @@ def time_checker():
     #     # if get_pixel_rgb(point) == FullCircleColor:
 
 
-# time.sleep(0.0824)
+def chase_me(angle):
+    start_from_y_axis = 90
+
+    while angle > 1:
+        angle_radians = math.radians(angle + start_from_y_axis)
+
+        point = (round(CenterCircle[0] + Radius * math.cos(angle_radians)),
+                 round(CenterCircle[1] - Radius * math.sin(angle_radians)))
+        move_mouse(point)
+        angle -= 1
+        time.sleep(0.0824)
+
 
 
 # while 1:
