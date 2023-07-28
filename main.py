@@ -19,18 +19,15 @@ BottomRightSecondScreen = (-1, 1497)
 # tapping the web so the program will be able to do the functions in the web page
 FirstTapToStartMakingActions = (-72, round((TopLeftSecondScreen[1] + BottomRightSecondScreen[1]) / 2))
 
-# search bar locations
-RightSideSearchBar = (-510, 467)
-LeftSideSearchBar = (-1774, 467)
-# search bar color
-SearchBarColor = (70, 71, 75)
+# favorites bar location
+FavoritesBar = (-55, 505)
+# favorites bar color
+FavoritesBarColor = (125, 126, 130)
+
 
 # if the search bar moved we need to add this amount to the x-axis
 IfMoved = 42
 
-
-# the location of the refresh button
-RefreshButton = (-1848, 467)
 
 # the location of the start button (green)
 GreenButtonColor = (149, 204, 0)
@@ -110,10 +107,9 @@ def color_dist(c1, c2):
     return (c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2 + (c1[2] - c2[2]) ** 2
 
 
-def find_refresh_locations():
-    if not get_pixel_rgb(LeftSideSearchBar) == SearchBarColor:
-        global RefreshButton
-        RefreshButton = (RefreshButton[0] + IfMoved, RefreshButton[1])
+def check_for_favorites():
+    if not get_pixel_rgb(FavoritesBar) == FavoritesBarColor:
+        keyboard.press_and_release('ctrl + shift + b')
 
 
 def screen_right_location():
@@ -131,37 +127,46 @@ def check_key_pressed():
 
 
 def time_checker():
-    angle = 1
-    while angle < 360:
-        start_from_y_axis = 90
-        angle_radians = math.radians(angle + start_from_y_axis)
-
-        point = (round(CenterCircle[0] + Radius * math.cos(angle_radians)),
-                 round(CenterCircle[1] - Radius * math.sin(angle_radians)))
-        move_mouse(point)
-        if get_pixel_rgb(point) == FullCircleColor:
-            print(angle)
-            chase_me(angle)
-            return 0
-            # return angle * Timer / 360
-        angle += 1
-
-    # cut_degree_counter = 0
-    #
-    # angle = 180
-    # start_from_y_axis = 90
-    #
-    # angle_radians = math.radians(angle + start_from_y_axis)
-    # point = (round(CenterCircle[0] + Radius * math.cos(angle_radians)),
-    #          round(CenterCircle[1] - Radius * math.sin(angle_radians)))
-    #
-    # if get_pixel_rgb(point) == FullCircleColor:
-    #     cut_degree_counter += 1
-    #     angle /= 2
+    # angle = 1
+    # while angle < 360:
+    #     start_from_y_axis = 90
     #     angle_radians = math.radians(angle + start_from_y_axis)
+    #
     #     point = (round(CenterCircle[0] + Radius * math.cos(angle_radians)),
     #              round(CenterCircle[1] - Radius * math.sin(angle_radians)))
-    #     # if get_pixel_rgb(point) == FullCircleColor:
+    #     move_mouse(point)
+    #     if get_pixel_rgb(point) == FullCircleColor:
+    #         print(angle)
+    #         chase_me(angle)
+    #         return 0
+    #         # return angle * Timer / 360
+    #     angle += 1
+
+    while True:
+        cut_degree_counter = 0
+
+        just_one_before = True
+        angle = 180
+        start_from_y_axis = 90
+
+        angle_radians = math.radians(angle + start_from_y_axis)
+        point = (round(CenterCircle[0] + Radius * math.cos(angle_radians)),
+                 round(CenterCircle[1] - Radius * math.sin(angle_radians)))
+        color = get_pixel_rgb(point)
+
+        if color == FullCircleColor and not just_one_before:
+            return angle * Timer / 360
+
+        elif color == FullCircleColor:
+            angle /= 2
+
+        else:
+            angle *= 1.5
+            just_one_before = False
+
+        cut_degree_counter += 1
+        just_one_before = True
+        print(just_one_before)
 
 
 def chase_me(angle):
@@ -175,7 +180,6 @@ def chase_me(angle):
         move_mouse(point)
         angle -= 1
         time.sleep(0.0824)
-
 
 
 # while 1:
@@ -196,7 +200,7 @@ emergency = False
 while True:
     if check_key_pressed():
         screen_right_location()
-        find_refresh_locations()
+        check_for_favorites()
 
         while not equal_color:
             if emergency:
@@ -209,7 +213,7 @@ while True:
             if not refreshed:
                 if get_pixel_rgb(TopCircle) == FullCircleColor:
                     wait_time = time_checker()
-                    print(f"time to wait: {wait_time}")
+                    print(f"Time to wait: {wait_time is None}")
                     time.sleep(wait_time)
 
             for i in range(BottomEnd[1] - TopStart[1]):
@@ -234,7 +238,7 @@ while True:
                     exit()
 
             if not equal_color:
-                mouse_click_with_position(RefreshButton)
+                keyboard.press_and_release('ctrl + r')
                 i = 30
                 while i:
                     i -= 1
